@@ -1,4 +1,17 @@
+import { useSelector, useDispatch } from "react-redux";
+import { addToCart } from "../redux/slice/productsSlice";
+
 function Product({ product }) {
+  const cartList = useSelector((state) => state.product.cartList);
+  const dispatch = useDispatch();
+
+  const isInCart = cartList.filter((item) => item.id == product.id) || [];
+
+  const handleBuyNow = () => {
+    if (isInCart.length == 0) {
+      dispatch(addToCart(product));
+    }
+  };
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
       <div className="relative">
@@ -31,15 +44,20 @@ function Product({ product }) {
         </p>
 
         <button
-          disabled={product.availabilityStatus !== "In Stock"}
+          onClick={handleBuyNow}
+          disabled={product.stock <= 0 || isInCart.length != 0}
           className={`w-full py-3 rounded-lg font-semibold text-white transition-all duration-200 ${
-            product.availabilityStatus === "In Stock"
+            product.stock > 0 && isInCart.length == 0
               ? "bg-green-500 hover:bg-green-600 active:scale-95"
+              : isInCart.length !== 0
+              ? "bg-blue-500 cursor-not-allowed"
               : "bg-gray-400 cursor-not-allowed"
           }`}
         >
-          {product.availabilityStatus === "In Stock"
-            ? "Buy Now"
+          {product.stock > 0
+            ? isInCart.length != 0
+              ? "Added to Cart"
+              : "Buy Now"
             : "Out Of Stock"}
         </button>
       </div>
