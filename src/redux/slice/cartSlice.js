@@ -54,16 +54,33 @@ const cartSlice = createSlice({
   },
 });
 
-// Helper function to save cart to storage
+// // Helper function to save cart to storage
+// const saveCartToStorage = (state) => {
+//   if (typeof window != "undefined" && window.Storage) {
+//     const cartData = {
+//       items: state.items,
+//       coupon: state.coupon,
+//     };
+//     window.Storage.set("cart", JSON.stringify(cartData), false).catch(
+//       console.error
+//     );
+//   } else {
+//     console.log("cart not stored into the localstorage");
+//   }
+// };
+
 const saveCartToStorage = (state) => {
-  if (typeof window !== "undefined" && window.Storage) {
+  if (typeof window !== "undefined") {
     const cartData = {
       items: state.items,
       coupon: state.coupon,
     };
-    window.Storage.set("cart", JSON.stringify(cartData), false).catch(
-      console.error
-    );
+
+    try {
+      localStorage.setItem("cart", JSON.stringify(cartData));
+    } catch (error) {
+      console.error("Failed to save cart", error);
+    }
   }
 };
 

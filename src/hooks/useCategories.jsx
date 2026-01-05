@@ -1,18 +1,22 @@
 import { useEffect, useState } from "react";
+import axios from "axios";
 
 const useCategories = () => {
   const [categories, setCategories] = useState([]);
-
-  useEffect(() => {
+  const getCategory = async () => {
     try {
-      const response = axios.get(
+      const response = await axios.get(
         "https://dummyjson.com/products/category-list"
       );
-      const data = response.data;
+      const data = await response.data;
       setCategories(data);
     } catch (error) {
       console.log(error.message);
     }
+  };
+
+  useEffect(() => {
+    getCategory();
   }, []);
 
   return categories;

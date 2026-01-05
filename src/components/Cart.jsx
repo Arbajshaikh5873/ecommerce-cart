@@ -1,62 +1,10 @@
-import { useDispatch } from "react-redux";
-import { incrementQuantity } from "../redux/slice/cartSlice";
-import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { applyCoupon, incrementQuantity } from "../redux/slice/cartSlice";
+import { Link, useNavigate } from "react-router-dom";
+import useLoadCart from "../hooks/useLoadcart";
+import { useMemo, useState } from "react";
+import Navbar from "./Navbar";
 
-// function Cart({ product }) {
-//   const dispatch = useDispatch();
-
-//   const handleIncrement = (product) => {
-//     dispatch(IncrementQuantity(product));
-//   };
-
-//   const handleDecrement = (product) => {
-//     dispatch(decrementQuantity(product));
-//   };
-
-//   const handleRemove = (product) => {
-//     dispatch(removeFromCart(product));
-//   };
-
-//   return (
-//     <div
-//       key={product.id}
-//       className="bg-white rounded-lg shadow-md p-4 flex items-center space-x-4"
-//     >
-//       <img
-//         src={product.thumbnail}
-//         alt={product.title}
-//         className="w-16 h-16 object-cover rounded"
-//       />
-//       <div className="flex-1">
-//         <h3 className="font-semibold text-gray-800">{product.title}</h3>
-//         <p className="text-gray-600">₹{product.price}</p>
-//       </div>
-//       <div className="flex items-center space-x-2">
-//         <button
-//           onClick={() => handleDecrement(product)}
-//           className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded"
-//         >
-//           -
-//         </button>
-//         <span className="font-semibold">{product.quantity}</span>
-//         <button
-//           onClick={() => handleIncrement(product)}
-//           className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded"
-//         >
-//           +
-//         </button>
-//       </div>
-//       <button
-//         onClick={() => handleRemove(product)}
-//         className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
-//       >
-//         Remove
-//       </button>
-//     </div>
-//   );
-// }
-
-// ==================== CART PAGE ====================
 const Cart = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
