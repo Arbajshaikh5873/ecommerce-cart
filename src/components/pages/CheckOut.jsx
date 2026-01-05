@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import useLoadCart from "../../hooks/useLoadcart";
 import { clearCart } from "../../redux/slice/cartSlice";
 import Navbar from "../Navbar";
+import OrderSuccess from "./OrderSuccess";
 
 // ==================== CHECKOUT PAGE ====================
 const Checkout = () => {
@@ -22,6 +23,7 @@ const Checkout = () => {
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [orderSuccessData, setOrderSuccessData] = useState(null);
 
   useLoadCart();
 
@@ -56,27 +58,24 @@ const Checkout = () => {
     setLoading(true);
 
     setTimeout(() => {
-      const order = {
-        id: Date.now(),
-        items: cartItems,
-        formData,
-        subtotal,
-        discount,
-        tax,
-        total,
-        coupon,
-        date: new Date().toISOString(),
-      };
-
       dispatch(clearCart());
       setLoading(false);
-      navigate("/order-confirmation", { state: { order } });
+      setOrderSuccessData({ orderItems: cartItems, total });
     }, 2000);
   };
 
-  if (cartItems.length === 0) {
+  if (cartItems.length === 0 && !orderSuccessData) {
     navigate("/");
     return null;
+  }
+
+  if (orderSuccessData) {
+    return (
+      <OrderSuccess
+        orderItems={orderSuccessData.orderItems}
+        total={orderSuccessData.total}
+      />
+    );
   }
 
   return (

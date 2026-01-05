@@ -1,5 +1,10 @@
 import { useDispatch, useSelector } from "react-redux";
-import { applyCoupon, incrementQuantity } from "../redux/slice/cartSlice";
+import {
+  applyCoupon,
+  incrementQuantity,
+  decrementQuantity,
+  removeFromCart,
+} from "../redux/slice/cartSlice";
 import { Link, useNavigate } from "react-router-dom";
 import useLoadCart from "../hooks/useLoadcart";
 import { useMemo, useState } from "react";
@@ -10,6 +15,7 @@ const Cart = () => {
   const navigate = useNavigate();
   const cartItems = useSelector((state) => state.cart.items);
   const coupon = useSelector((state) => state.cart.coupon);
+  const user = useSelector((state) => state.auth.user);
   const [couponCode, setCouponCode] = useState("");
   const [couponError, setCouponError] = useState("");
 
@@ -42,7 +48,11 @@ const Cart = () => {
   const handleApplyCoupon = () => {
     if (coupons[couponCode]) {
       dispatch(
-        applyCoupon({ code: couponCode, percentage: coupons[couponCode] })
+        applyCoupon({
+          code: couponCode,
+          percentage: coupons[couponCode],
+          userId: user?.email,
+        })
       );
       setCouponError("");
     } else {
@@ -121,7 +131,11 @@ const Cart = () => {
 
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => dispatch(decrementQuantity(item.id))}
+                    onClick={() =>
+                      dispatch(
+                        decrementQuantity({ id: item.id, userId: user?.email })
+                      )
+                    }
                     className="bg-gray-200 hover:bg-gray-300 text-gray-700 w-8 h-8 rounded"
                   >
                     -
@@ -130,7 +144,11 @@ const Cart = () => {
                     {item.quantity}
                   </span>
                   <button
-                    onClick={() => dispatch(incrementQuantity(item.id))}
+                    onClick={() =>
+                      dispatch(
+                        incrementQuantity({ id: item.id, userId: user?.email })
+                      )
+                    }
                     className="bg-gray-200 hover:bg-gray-300 text-gray-700 w-8 h-8 rounded"
                   >
                     +
@@ -138,7 +156,11 @@ const Cart = () => {
                 </div>
 
                 <button
-                  onClick={() => dispatch(removeFromCart(item.id))}
+                  onClick={() =>
+                    dispatch(
+                      removeFromCart({ id: item.id, userId: user?.email })
+                    )
+                  }
                   className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
                 >
                   Remove

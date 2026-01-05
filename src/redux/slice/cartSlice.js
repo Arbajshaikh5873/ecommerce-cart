@@ -15,38 +15,43 @@ const cartSlice = createSlice({
       state.loading = false;
     },
     addToCart: (state, action) => {
-      const exists = state.items.find((item) => item.id === action.payload.id);
+      const { product, userId } = action.payload;
+      const exists = state.items.find((item) => item.id === product.id);
       if (!exists) {
-        state.items.push({ ...action.payload, quantity: 1 });
-        saveCartToStorage(state);
+        state.items.push({ ...product, quantity: 1 });
+        saveCartToStorage(state, userId);
       }
     },
     removeFromCart: (state, action) => {
-      state.items = state.items.filter((item) => item.id !== action.payload);
-      saveCartToStorage(state);
+      const { id, userId } = action.payload;
+      state.items = state.items.filter((item) => item.id !== id);
+      saveCartToStorage(state, userId);
     },
     incrementQuantity: (state, action) => {
-      const item = state.items.find((item) => item.id === action.payload);
+      const { id, userId } = action.payload;
+      const item = state.items.find((item) => item.id === id);
       if (item) {
         item.quantity += 1;
-        saveCartToStorage(state);
+        saveCartToStorage(state, userId);
       }
     },
     decrementQuantity: (state, action) => {
-      const item = state.items.find((item) => item.id === action.payload);
+      const { id, userId } = action.payload;
+      const item = state.items.find((item) => item.id === id);
       if (item && item.quantity > 1) {
         item.quantity -= 1;
-        saveCartToStorage(state);
+        saveCartToStorage(state, userId);
       }
     },
     applyCoupon: (state, action) => {
-      state.coupon = action.payload;
-      saveCartToStorage(state);
+      const { code, percentage, userId } = action.payload;
+      state.coupon = { code, percentage };
+      saveCartToStorage(state, userId);
     },
-    clearCart: (state) => {
+    clearCart: (state, action) => {
       state.items = [];
       state.coupon = null;
-      saveCartToStorage(state);
+      saveCartToStorage(state, action.payload?.userId);
     },
     setLoading: (state, action) => {
       state.loading = action.payload;
@@ -69,7 +74,7 @@ const cartSlice = createSlice({
 //   }
 // };
 
-const saveCartToStorage = (state) => {
+const saveCartToStorage = (state, userId = null) => {
   if (typeof window !== "undefined") {
     const cartData = {
       items: state.items,
@@ -77,7 +82,8 @@ const saveCartToStorage = (state) => {
     };
 
     try {
-      localStorage.setItem("cart", JSON.stringify(cartData));
+      const storageKey = userId ? `cart_${userId}` : "cart";
+      localStorage.setItem(storageKey, JSON.stringify(cartData));
     } catch (error) {
       console.error("Failed to save cart", error);
     }

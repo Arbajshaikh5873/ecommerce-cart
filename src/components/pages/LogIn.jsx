@@ -1,8 +1,13 @@
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import { useEffect, useState } from "react";
 import * as Yup from "yup";
+import { useDispatch } from "react-redux";
+import { login } from "../../redux/slice/authSlice";
+import { useNavigate } from "react-router-dom";
 
 function LogIn() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,11 +32,8 @@ function LogIn() {
   const validationSchema = Yup.object({
     email: Yup.string().required("Required").email("Invalid Email"),
     Password: Yup.string()
-      .required("required")
-      .min(8, "Length should be min 8 characters "),
-    confirmPassword: Yup.string()
-      .oneOf([Yup.ref("Password"), null], "Passwords must match")
-      .required("Required"),
+      .required("Required")
+      .min(8, "Length should be min 8 characters"),
   });
 
   const handleSubmit = (values) => {
@@ -39,16 +41,31 @@ function LogIn() {
     // if current user is not present then
     if (checkUserExist(values)) {
       localStorage.setItem("currUser", JSON.stringify(values));
+      dispatch(login(values));
+      navigate("/");
       console.log("Log in successful", values);
     }
     setLoading(false);
   };
   return (
-    <div>
-      {loading && <div>Loading...</div>}
-      {error && <div>Error...{error}</div>}
-      {!loading && !error && (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
         <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Log In to Your Account
+          </h2>
+        </div>
+        {loading && (
+          <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative">
+            Loading...
+          </div>
+        )}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+            Error: {error}
+          </div>
+        )}
+        {!loading && !error && (
           <Formik
             initialValues={{
               email: "",
@@ -59,74 +76,104 @@ function LogIn() {
             onSubmit={handleSubmit}
           >
             {({ touched, errors, values }) => (
-              <Form onSubmit={Formik.handleSubmit}>
-                {/* Email */}
-                <div>
-                  <label>enter email</label>
-                  <Field
-                    type={"email"}
-                    name={"email"}
-                    placeholder="enter email"
-                  />
-                  {touched.email && errors.email && (
-                    <ErrorMessage name={"email"} component={"div"} />
-                  )}
-                </div>
-
-                {/* Password */}
-                <div>
-                  <label>enter password</label>
+              <Form className="mt-8 space-y-6">
+                <div className="rounded-md shadow-sm -space-y-px">
+                  {/* Email */}
                   <div>
+                    <label htmlFor="email" className="sr-only">
+                      Email address
+                    </label>
                     <Field
-                      type={showPassword ? "text" : "password"}
-                      name="Password"
-                      autoComplete="new-password"
-                      placeholder="Enter password"
+                      id="email"
+                      name="email"
+                      type="email"
+                      autoComplete="email"
+                      required
+                      className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                      placeholder="Email address"
                     />
-
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? "Hide" : "Show"}
-                    </button>
+                    {touched.email && errors.email && (
+                      <ErrorMessage
+                        name="email"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
+                      />
+                    )}
                   </div>
-                  {touched.Password && errors.Password && (
-                    <ErrorMessage name={"Password"} />
-                  )}
-                </div>
 
-                {/* confirmPassword */}
-                <div>
-                  <label>confirmPassword</label>
+                  {/* Password */}
                   <div>
-                    <Field
-                      type={showPassword ? "text" : "password"}
-                      name={"confirmPassword"}
-                      autoComplete="new-password"
-                      placeholder="Enter confirm password"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? "Hide" : "Show"}
-                    </button>
+                    <label htmlFor="password" className="sr-only">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <Field
+                        id="password"
+                        name="Password"
+                        type={showPassword ? "text" : "password"}
+                        autoComplete="current-password"
+                        required
+                        className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                        placeholder="Password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                      >
+                        {showPassword ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                    {touched.Password && errors.Password && (
+                      <ErrorMessage
+                        name="Password"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
+                      />
+                    )}
                   </div>
-                  {touched.confirmPassword && errors.confirmPassword && (
-                    <ErrorMessage name={"confirmPassword"} />
-                  )}
+
+                  {/* Confirm Password */}
+                  <div>
+                    <label htmlFor="confirmPassword" className="sr-only">
+                      Confirm Password
+                    </label>
+                    <div className="relative">
+                      <Field
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        type={showPassword ? "text" : "password"}
+                        autoComplete="new-password"
+                        required
+                        className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                        placeholder="Confirm Password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                      >
+                        {showPassword ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                    {touched.confirmPassword && errors.confirmPassword && (
+                      <ErrorMessage
+                        name="confirmPassword"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
+                      />
+                    )}
+                  </div>
                 </div>
 
                 {/* Live Password match indicator */}
                 {values.confirmPassword && (
                   <div
-                    style={{
-                      color:
-                        values.Password === values.confirmPassword
-                          ? "green"
-                          : "red",
-                    }}
+                    className={`text-sm ${
+                      values.Password === values.confirmPassword
+                        ? "text-green-600"
+                        : "text-red-600"
+                    }`}
                   >
                     {values.Password === values.confirmPassword
                       ? "Passwords match"
@@ -134,12 +181,19 @@ function LogIn() {
                   </div>
                 )}
 
-                <button type="submit">Log In</button>
+                <div>
+                  <button
+                    type="submit"
+                    className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Log In
+                  </button>
+                </div>
               </Form>
             )}
           </Formik>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

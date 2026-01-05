@@ -2,6 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useMemo } from "react";
 import useCategories from "../hooks/useCategories";
 import { Link } from "react-router-dom";
+import { logout } from "../redux/slice/authSlice";
 
 // ==================== NAVBAR COMPONENT ====================
 const Navbar = ({
@@ -12,12 +13,12 @@ const Navbar = ({
   priceRange,
   setPriceRange,
 }) => {
+  const dispatch = useDispatch();
   const categories = useCategories();
   const cartItems = useSelector((state) => state.cart.items);
-  const cartCount = useMemo(
-    () => cartItems.reduce((sum, item) => sum + item.quantity, 0),
-    [cartItems]
-  );
+  const cartCount = useMemo(() => cartItems.length, [cartItems]);
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const user = useSelector((state) => state.auth.user);
 
   return (
     <nav className="bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg sticky top-0 z-50">
@@ -101,6 +102,35 @@ const Navbar = ({
                 </span>
               )}
             </Link>
+
+            {isAuthenticated ? (
+              <div className="flex items-center gap-2">
+                <span className="text-white text-sm">
+                  Hello, {user?.FullName}
+                </span>
+                <button
+                  onClick={() => dispatch(logout())}
+                  className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-sm"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <Link
+                  to="/login"
+                  className="bg-white text-gray-700 px-3 py-1 rounded-lg text-sm hover:bg-gray-100"
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/signin"
+                  className="bg-white text-gray-700 px-3 py-1 rounded-lg text-sm hover:bg-gray-100"
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>

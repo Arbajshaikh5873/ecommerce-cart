@@ -1,8 +1,13 @@
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import { useEffect, useState } from "react";
 import * as Yup from "yup";
+import { useDispatch } from "react-redux";
+import { login } from "../../redux/slice/authSlice";
+import { useNavigate } from "react-router-dom";
 
 function SignIn() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -42,8 +47,10 @@ function SignIn() {
     // if current user is not present then
     if (checkUserExist(values)) {
       setUsers((prev) => [...prev, values]);
-      localStorage.setItem("currUser", JSON.stringify(values));
-      localStorage.setItem("users", JSON.stringify(users));
+      localStorage.setItem("currentUser", JSON.stringify(values));
+      localStorage.setItem("users", JSON.stringify([...users, values]));
+      dispatch(login(values));
+      navigate("/");
       console.log("sign in successful", values);
     }
     setLoading(false);
@@ -63,11 +70,24 @@ function SignIn() {
   };
 
   return (
-    <div>
-      {loading && <div>Loading...</div>}
-      {error && <div>Error...{error}</div>}
-      {!loading && !error && (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
         <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Create Your Account
+          </h2>
+        </div>
+        {loading && (
+          <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative">
+            Loading...
+          </div>
+        )}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+            Error: {error}
+          </div>
+        )}
+        {!loading && !error && (
           <Formik
             initialValues={{
               FullName: "",
@@ -81,103 +101,191 @@ function SignIn() {
             onSubmit={handleSubmit}
           >
             {({ errors, touched, values }) => (
-              <Form onSubmit={Formik.handleSubmit}>
-                {/* Full name */}
-                <div>
-                  <label>enter name</label>
-                  <Field name={"FullName"} placeholder="enter name" />
-                  {touched.FullName && errors.FullName && (
-                    <ErrorMessage name={"FullName"} component={"div"} />
-                  )}
-                </div>
-
-                {/* Email */}
-
-                <div>
-                  <label>enter email</label>
-                  <Field
-                    type={"email"}
-                    name={"email"}
-                    placeholder="enter email"
-                  />
-                  {touched.email && errors.email && (
-                    <ErrorMessage name={"email"} component={"div"} />
-                  )}
-                </div>
-
-                {/* Address */}
-                <div>
-                  <label>enter address here:</label>
-                  <Field name={"address"} placeholder="enter address" />
-                  {touched.address && errors.address && (
-                    <ErrorMessage name={"address"} />
-                  )}
-                </div>
-
-                {/* Password */}
-                <div>
-                  <label>enter password</label>
+              <Form className="mt-8 space-y-6">
+                <div className="rounded-md shadow-sm -space-y-px">
+                  {/* Full name */}
                   <div>
+                    <label htmlFor="fullName" className="sr-only">
+                      Full Name
+                    </label>
                     <Field
-                      type={showPassword ? "text" : "password"}
-                      name="Password"
-                      autoComplete="new-password"
-                      placeholder="Enter password"
+                      id="fullName"
+                      name="FullName"
+                      type="text"
+                      autoComplete="name"
+                      required
+                      className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                      placeholder="Full Name"
                     />
-
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? "Hide" : "Show"}
-                    </button>
+                    {touched.FullName && errors.FullName && (
+                      <ErrorMessage
+                        name="FullName"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
+                      />
+                    )}
                   </div>
 
+                  {/* Email */}
                   <div>
-                    Strength: <b>{getPasswordStrength(values.Password)}</b>
+                    <label htmlFor="email" className="sr-only">
+                      Email address
+                    </label>
+                    <Field
+                      id="email"
+                      name="email"
+                      type="email"
+                      autoComplete="email"
+                      required
+                      className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                      placeholder="Email address"
+                    />
+                    {touched.email && errors.email && (
+                      <ErrorMessage
+                        name="email"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
+                      />
+                    )}
                   </div>
 
-                  {touched.Password && errors.Password && (
-                    <ErrorMessage name={"Password"} />
-                  )}
+                  {/* Address */}
+                  <div>
+                    <label htmlFor="address" className="sr-only">
+                      Address
+                    </label>
+                    <Field
+                      id="address"
+                      name="address"
+                      type="text"
+                      autoComplete="address"
+                      required
+                      className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                      placeholder="Address"
+                    />
+                    {touched.address && errors.address && (
+                      <ErrorMessage
+                        name="address"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
+                      />
+                    )}
+                  </div>
+
+                  {/* Password */}
+                  <div>
+                    <label htmlFor="password" className="sr-only">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <Field
+                        id="password"
+                        name="Password"
+                        type={showPassword ? "text" : "password"}
+                        autoComplete="new-password"
+                        required
+                        className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                        placeholder="Password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                      >
+                        {showPassword ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                    <div className="text-sm text-gray-600 mt-1">
+                      Strength:{" "}
+                      <span
+                        className={`font-medium ${
+                          getPasswordStrength(values.Password) === "Strong"
+                            ? "text-green-600"
+                            : getPasswordStrength(values.Password) === "Medium"
+                            ? "text-yellow-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        {getPasswordStrength(values.Password)}
+                      </span>
+                    </div>
+                    {touched.Password && errors.Password && (
+                      <ErrorMessage
+                        name="Password"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
+                      />
+                    )}
+                  </div>
+
+                  {/* Confirm Password */}
+                  <div>
+                    <label htmlFor="confirmPassword" className="sr-only">
+                      Confirm Password
+                    </label>
+                    <div className="relative">
+                      <Field
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        type={showPassword ? "text" : "password"}
+                        autoComplete="new-password"
+                        required
+                        className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                        placeholder="Confirm Password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                      >
+                        {showPassword ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                    {touched.confirmPassword && errors.confirmPassword && (
+                      <ErrorMessage
+                        name="confirmPassword"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
+                      />
+                    )}
+                  </div>
+
+                  {/* Contact */}
+                  <div>
+                    <label htmlFor="contact" className="sr-only">
+                      Contact Number
+                    </label>
+                    <Field
+                      id="contact"
+                      name="contact"
+                      type="tel"
+                      autoComplete="tel"
+                      className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                      placeholder="Contact Number"
+                    />
+                    {touched.contact && errors.contact && (
+                      <ErrorMessage
+                        name="contact"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
+                      />
+                    )}
+                  </div>
                 </div>
 
-                {/* confirmPassword */}
                 <div>
-                  <label>confirmPassword</label>
-                  <Field
-                    type={showPassword ? "text" : "password"}
-                    name={"confirmPassword"}
-                    autoComplete="new-password"
-                    placeholder="Enter confirm password"
-                  />
                   <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
+                    type="submit"
+                    className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
-                    {showPassword ? "Hide" : "Show"}
+                    Sign In
                   </button>
-                  {touched.confirmPassword && errors.confirmPassword && (
-                    <ErrorMessage name={"confirmPassword"} />
-                  )}
                 </div>
-
-                {/* contact details */}
-
-                <div>
-                  <label>enter contact number</label>
-                  <Field name={"contact"} placeholder="enter contact number" />
-                  {touched.contact && errors.contact && (
-                    <ErrorMessage name={"contact"} />
-                  )}
-                </div>
-
-                <button type="submit">Sign In</button>
               </Form>
             )}
           </Formik>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
-
 import { useSelector, useDispatch } from "react-redux";
 import { addToCart } from "../redux/slice/cartSlice";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 // ProductCard Component
 // function ProductCard({ search, priceRange }) {
@@ -148,11 +149,18 @@ import { addToCart } from "../redux/slice/cartSlice";
 // ==================== PRODUCT CARD ====================
 const ProductCard = ({ product }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const cartItems = useSelector((state) => state.cart.items);
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const user = useSelector((state) => state.auth.user);
   const isInCart = cartItems.some((item) => item.id === product.id);
 
   const handleAddToCart = () => {
-    dispatch(addToCart(product));
+    if (!isAuthenticated) {
+      navigate("/signin");
+      return;
+    }
+    dispatch(addToCart({ product, userId: user?.email }));
   };
 
   return (
@@ -192,8 +200,6 @@ const ProductCard = ({ product }) => {
           className={`w-full py-3 rounded-lg font-semibold text-white transition-all duration-200 ${
             product.stock > 0 && !isInCart
               ? "bg-green-500 hover:bg-green-600 active:scale-95"
-              : isInCart
-              ? "bg-blue-500 cursor-not-allowed"
               : "bg-gray-400 cursor-not-allowed"
           }`}
         >
